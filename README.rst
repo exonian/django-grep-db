@@ -20,4 +20,5 @@ Quick start
 
     INSTALLED_APPS = INSTALLED_APPS + ('django_grepdb',) 
 
-2. Run `python manage.py grepdb <pattern> <app_label.Model.field_name>`
+2. Run:
+    python manage.py grepdb <pattern> <app_label.Model.field_name>
