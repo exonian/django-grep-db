@@ -9,9 +9,10 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-grep-db',
-    version='0.1.2',
+    version='0.1.3',
     packages=find_packages(),
     include_package_data=True,
+    install_requires=['django>=1.7', 'colorama>=0.3.3', 'termcolor>=1.1.0'],
 
     description='A simple Django app for command-line searching via the ORM',
     long_description=README,

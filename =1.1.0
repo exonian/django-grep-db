@@ -1,0 +1,9 @@
+Downloading/unpacking termcolor
+  Downloading termcolor-1.1.0.tar.gz
+  Running setup.py (path:/home/michael/envs/django-grep-db/build/termcolor/setup.py) egg_info for package termcolor
+    
+Installing collected packages: termcolor
+  Running setup.py install for termcolor
+    
+Successfully installed termcolor
+Cleaning up...
