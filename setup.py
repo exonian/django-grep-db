@@ -11,8 +11,13 @@ setup(
     name='django-grep-db',
     version='0.1.2',
     packages=find_packages(),
-        include_package_data=True,
-        license='BSD License',
-        description='A simple Django app for command-line searching via the ORM',
-        long_description=README,
+    include_package_data=True,
+
+    description='A simple Django app for command-line searching via the ORM',
+    long_description=README,
+    keywords='django search grep cli',
+    license='MIT',
+    author='Michael Blatherwick',
+    author_email='michael.blatherwick@exeter.oxon.org',
+    url='https://github.com/exonian/django-grep-db',
 )

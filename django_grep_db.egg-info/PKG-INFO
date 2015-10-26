@@ -2,10 +2,10 @@ Metadata-Version: 1.0
 Name: django-grep-db
 Version: 0.1.2
 Summary: A simple Django app for command-line searching via the ORM
-Home-page: UNKNOWN
-Author: UNKNOWN
-Author-email: UNKNOWN
-License: BSD License
+Home-page: https://github.com/exonian/django-grep-db
+Author: Michael Blatherwick
+Author-email: michael.blatherwick@exeter.oxon.org
+License: MIT
 Description: ======
         grepdb
         ======
@@ -30,4 +30,5 @@ Description: ======
         
         2. Run `python manage.py grepdb <pattern> <app_label.Model.field_name>`
         
+Keywords: django search grep cli
 Platform: UNKNOWN
