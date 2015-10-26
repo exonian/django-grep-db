@@ -11,7 +11,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('pattern', type=str, help='Pattern to search for')
-        parser.add_argument('identifier', nargs='*', type=str, help='Identifier of an app, model or field')
+        parser.add_argument('identifier', nargs='+', type=str, help='Identifier of an app, model or field')
         parser.add_argument('--show', '-s', nargs='?', type=int, const=0,
                             help='Amount of text to show around result; overrides default of not showing results')
         parser.add_argument('--ignore-case', '-i', action='store_true', help='Match case-insensitively')
