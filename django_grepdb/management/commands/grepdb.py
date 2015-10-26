@@ -31,13 +31,15 @@ class Command(BaseCommand):
                     show = options.get('show', False)
                     if show is not None:  # can't be a truthiness check, as zero is different from no show
                         text = getattr(result, query['field_name'])
-                        surrounded_pattern = '.{{0,{show}}}{pattern}.{{0,{show}}}'.format(show=show, pattern=self.pattern)
+                        surrounded_pattern = r'(.{{0,{show}}})({pattern})(.{{0,{show}}})'.format(
+                            show=show, pattern=self.pattern
+                        )
                         regex_args = [surrounded_pattern, text]
                         if self.ignore_case:
                             regex_args.append(re.IGNORECASE)
                         matches = re.findall(*regex_args)
-                        for match in matches:
-                            self.stdout.write(match)
+                        for pre, match, post in matches:
+                            self.stdout.write(pre + colored(match, 'grey', 'on_yellow') + post)
                         self.stdout.write('')
 
     def get_queries(self, identifiers):
