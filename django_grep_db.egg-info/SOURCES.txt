@@ -1,0 +1,11 @@
+MANIFEST.in
+README.rst
+setup.py
+django_grep_db.egg-info/PKG-INFO
+django_grep_db.egg-info/SOURCES.txt
+django_grep_db.egg-info/dependency_links.txt
+django_grep_db.egg-info/top_level.txt
+django_grepdb/__init__.py
+django_grepdb/management/__init__.py
+django_grepdb/management/commands/__init__.py
+django_grepdb/management/commands/grepdb.py
