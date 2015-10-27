@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-grep-db',
-    version='0.1.4',
+    version='0.1.5',
     packages=find_packages(),
     install_requires=['django>=1.7', 'colorama>=0.3.3', 'termcolor>=1.1.0'],
 
