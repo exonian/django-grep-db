@@ -1,6 +1,8 @@
+AUTHORS.rst
 LICENSE
 MANIFEST.in
 README.rst
+setup.cfg
 setup.py
 django_grep_db.egg-info/PKG-INFO
 django_grep_db.egg-info/SOURCES.txt

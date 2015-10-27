@@ -1,8 +1,8 @@
 ======
-grepdb
+django_grepdb
 ======
 
-grepdb is a simple command-line app to provide basic grep-like searching of
+django_grepdb is a simple command-line app to provide basic grep-like searching of
 Django model fields using the ORM.
 
 Quick start
