@@ -55,7 +55,7 @@ class Command(BaseCommand):
         return {'{field_name}__{lookup_type}'.format(field_name=field_name, lookup_type=lookup_type): self.pattern}
 
     def get_value(self, result, query):
-        text = getattr(result, query['field_name'])
+        text = ''.join(getattr(result, query['field_name']).splitlines())
         surrounded_pattern = r'(.{{0,{outer}}})({pattern})(.{{0,{outer}}})'.format(
             outer=self.show_values, pattern=self.pattern
         )
