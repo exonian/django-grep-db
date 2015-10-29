@@ -24,9 +24,10 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('pattern', type=str, help='Pattern to search for')
         parser.add_argument('identifier', nargs='+', type=str, help='Identifier of an app, model or field')
-        parser.add_argument('--show-values', '-s', nargs='?', type=show_values_style, const='l',
-                            help='Show field value in addition to object representation and pk. ' +
-                                 'Takes optional value of number of chars to show each side of match (default is 25)')
+        parser.add_argument('--show-values', '-s', nargs='?', type=show_values_style, default='l',
+                            help='Turn off showing matching values (default is any line containing a match, ' +
+                            'or provide the mode "a" to show the entire field ' +
+                            'or an integer to show that many characters either side of a match.')
         parser.add_argument('--ignore-case', '-i', action='store_true', help='Match case-insensitively')
 
     def handle(self, **options):
