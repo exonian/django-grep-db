@@ -105,13 +105,22 @@ class Command(BaseCommand):
         return value
 
     def get_value_surrounded(self, text):
-        chars = self.show_values
-        surrounded_pattern = r'(.{{0,{chars}}})({pattern})(.{{0,{chars}}})'.format(
-            chars=self.show_values, pattern=self.pattern
-        )
-        regex_args = [surrounded_pattern, text, re.DOTALL]
+        regex_args = [self.pattern, text]
         if self.ignore_case:
             regex_args.append(re.IGNORECASE)
         matches = re.findall(*regex_args)
-        for pre, match, post in matches:
-             return pre + colored(match, 'grey', 'on_yellow') + post + '\n\n'
+        chars = self.show_values
+        matches = [m.span() for m in re.finditer(*regex_args)]
+        value = u''
+        end_of_previous = 0
+        for start, end in matches:
+            if end_of_previous and end_of_previous > start:
+                value = value[:start - end_of_previous]
+            elif end_of_previous and end_of_previous > start - chars:
+                value += text[end_of_previous:start]
+            else:
+                value += '\n' + text[start - chars:start]
+            value += colored(text[start:end], 'grey', 'on_yellow') + text[end:end + chars]
+            end_of_previous = end + chars
+        value = value.strip() + '\n\n'
+        return value
