@@ -79,7 +79,7 @@ class Command(BaseCommand):
     def get_value_all(self, text):
         regex_args = [self.pattern, text, re.DOTALL]
         if self.ignore_case:
-            regex_args.append(re.IGNORECASE)
+            regex_args[2] += re.IGNORECASE
         matches = [m.span() for m in re.finditer(*regex_args)]
         value = u''
         end_of_previous = 0
