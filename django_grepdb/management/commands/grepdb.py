@@ -20,22 +20,29 @@ def show_values_style(arg):
 
 class Command(BaseCommand):
     help = 'Provides a grep-like command line interface for searching objects in the database'
-    field_types = [u'TextField']
 
     def add_arguments(self, parser):
         parser.add_argument('pattern', type=str, help='Pattern to search for')
         parser.add_argument('identifier', nargs='+', type=str, help='Identifier of a model or field')
         parser.add_argument('--show-values', '-s', nargs='?', type=show_values_style, default='l',
-                            help='Turn off showing matching values (default is any line containing a match, ' +
+                            help='Turn off showing matching values (default is any line containing a match), ' +
                             'or provide the mode "a" to show the entire field ' +
                             'or an integer to show that many characters either side of a match.')
         parser.add_argument('--ignore-case', '-i', action='store_true', help='Match case-insensitively')
+        parser.add_argument('--find-text-fields', '-t', dest='field_types', action='append_const', const='TextField',
+                            help='Search all TextField fields on a model if no field is specified')
+        parser.add_argument('--find-char-fields', '-c', dest='field_types', action='append_const', const='CharField',
+                            help='Search all CharField fields on a model if no field is specified')
+        parser.add_argument('--find-fields', '-f', dest='field_types', action='append', type=str,
+                            help='Search all fields of this type on a model if no field is specified')
 
     def handle(self, **options):
         colorama.init()
         self.pattern = options['pattern']
         self.ignore_case = options['ignore_case']
         self.show_values = options.get('show_values', False)
+        self.field_types = options['field_types'] or ['TextField']
+
         identifiers = options['identifier']
         queries = self.get_queries(identifiers)
         for query in queries:
