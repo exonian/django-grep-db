@@ -90,13 +90,19 @@ class Command(BaseCommand):
         return value
 
     def get_value_line(self, text):
-        surrounded_pattern = r'(\\n.*)({pattern})(\\n.*)'.format(pattern=self.pattern)
-        regex_args = [surrounded_pattern, text]
-        if self.ignore_case:
-            regex_args.append(re.IGNORECASE)
-        matches = re.findall(*regex_args)
-        for pre, match, post in matches:
-             return pre + colored(match, 'grey', 'on_yellow') + post + '\n\n'
+        value = u''
+        for line in text.splitlines():
+            regex_args = [self.pattern, line]
+            if self.ignore_case:
+                regex_args.append(re.IGNORECASE)
+            matches = [m.span() for m in re.finditer(*regex_args)]
+            if matches:
+                end_of_previous = 0
+                for start, end in matches:
+                    value = value + line[end_of_previous:start] + colored(line[start:end], 'grey', 'on_yellow')
+                    end_of_previous = end
+                value = value + line[end_of_previous:] + '\n\n'
+        return value
 
     def get_value_surrounded(self, text):
         chars = self.show_values
