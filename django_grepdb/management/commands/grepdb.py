@@ -20,10 +20,11 @@ def show_values_style(arg):
 
 class Command(BaseCommand):
     help = 'Provides a grep-like command line interface for searching objects in the database'
+    field_types = [u'TextField']
 
     def add_arguments(self, parser):
         parser.add_argument('pattern', type=str, help='Pattern to search for')
-        parser.add_argument('identifier', nargs='+', type=str, help='Identifier of an app, model or field')
+        parser.add_argument('identifier', nargs='+', type=str, help='Identifier of a model or field')
         parser.add_argument('--show-values', '-s', nargs='?', type=show_values_style, default='l',
                             help='Turn off showing matching values (default is any line containing a match, ' +
                             'or provide the mode "a" to show the entire field ' +
@@ -40,26 +41,41 @@ class Command(BaseCommand):
         for query in queries:
             results = self.search(query)
             if results.exists():
-                self.stdout.write(colored(u'\n{}'.format(query['manager'].model), 'cyan', attrs=['bold']))
+                self.stdout.write(colored(u'\n{model} {field}'.format(model=query['manager'].model, field=query['field_name']),
+                                          'cyan', attrs=['bold']))
                 for result in results:
                     self.stdout.write(colored(u'{result} (pk={result.pk})'.format(result=result), 'green', attrs=['bold']))
                     if self.show_values is not None:  # can't be a truthiness check, as zero is different from no show
                         self.stdout.write(self.get_value(result, query))
 
     def get_queries(self, identifiers):
-        return [self.get_query(identifier) for identifier in identifiers]
+        queries = []
+        for identifier in identifiers:
+            queries.extend(self.get_queries_for_identifier(identifier))
+        return queries
 
-    def get_query(self, identifier):
-        model, field_name = self.parse_identifier(identifier)
-        params = self.get_queryset_params(field_name)
-        return dict(manager=model._default_manager, params=params, field_name=field_name)
+    def get_queries_for_identifier(self, identifier):
+        model, field_names = self.parse_identifier(identifier)
+        queries = []
+        for field_name in field_names:
+            params = self.get_queryset_params(field_name)
+            queries.append(dict(manager=model._default_manager, params=params, field_name=field_name))
+        return queries
 
     def search(self, query):
         return query['manager'].filter(**query['params'])
 
     def parse_identifier(self, identifier):
-        app_label, model_name, field_name = identifier.split('.')
-        return (apps.get_model(app_label, model_name), field_name)
+        parts = identifier.split('.')
+        app_label, model_name = parts[:2]
+        field_names = parts[2:]
+        model = apps.get_model(app_label, model_name)
+        if not field_names:
+            field_names = self.get_field_names_for_model(model)
+        return (model, field_names)
+
+    def get_field_names_for_model(self, model):
+        return [field.name for field in model._meta.fields if field.get_internal_type() in self.field_types]
 
     def get_queryset_params(self, field_name):
         lookup_type = 'regex'
