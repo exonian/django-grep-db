@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('pattern', type=str, help='Pattern to search for')
-        parser.add_argument('identifier', nargs='+', type=str, help='Identifier of a model or field')
+        parser.add_argument('identifier', nargs='*', type=str, help='Identifier of a model or field')
         parser.add_argument('--show-values', '-s', nargs='?', type=show_values_style, default='l',
                             help='Turn off showing matching values (default is any line containing a match), ' +
                             'or provide the mode "a" to show the entire field ' +
@@ -43,9 +43,14 @@ class Command(BaseCommand):
                             'Can be passed one or more hostnames to use instead. If DJANGO_GREPDB_SITES is a dict ' +
                             'defined in settings, keys from it can also be passed to use their values as hostnames.' +
                             'Links can be disabled by using this argument without any values.')
+        parser.add_argument('--preset', '-p', help='The name of a preset configuration in django.conf.settings')
+        self.parser = parser
 
     def handle(self, **options):
         colorama.init()
+        preset = self.get_preset(options['preset'])
+        if preset:
+            preset_options = vars(preset)
         self.pattern = options['pattern']
         self.ignore_case = options['ignore_case']
         self.show_values = options.get('show_values', False)
@@ -95,6 +100,18 @@ class Command(BaseCommand):
             raise CommandError(msg.format(reference))
         return hostname
 
+    def get_preset(self, preset_name):
+        if not preset_name:
+            return None
+        try:
+            presets = getattr(settings, 'DJANGO_GREPDB_PRESETS')
+        except AttributeError:
+            raise CommandError(u'Preset specified but DJANGO_GREPDB_PRESETS is not configured in settings')
+        try:
+            preset = presets[preset_name]
+        except KeyError:
+            raise CommandError(u'Preset "{}" not found in DJANGO_GREPDB_PRESETS'.format(preset_name))
+        return self.parser.parse_args(preset)
 
     def get_queries(self, identifiers):
         queries = []
