@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('pattern', type=str, help='Pattern to search for')
-        parser.add_argument('identifier', nargs='+', type=str, help='Identifier of a model or field')
+        parser.add_argument('identifiers', nargs='*', type=str, help='Identifier of a model or field')
         parser.add_argument('--show-values', '-s', nargs='?', type=show_values_style, default='l',
                             help='Turn off showing matching values (default is any line containing a match), ' +
                             'or provide the mode "a" to show the entire field ' +
@@ -43,16 +43,25 @@ class Command(BaseCommand):
                             'Can be passed one or more hostnames to use instead. If DJANGO_GREPDB_SITES is a dict ' +
                             'defined in settings, keys from it can also be passed to use their values as hostnames.' +
                             'Links can be disabled by using this argument without any values.')
+        parser.add_argument('--preset', '-p', help='The name of a preset configuration in DJANGO_GREPDB_PRESETS. ' +
+                            'DJANGO_GREPDB_PRESETS should be a dict of dicts, with each config dict providing ' +
+                            'default values for any number of parser args.')
+        self.parser = parser
 
     def handle(self, **options):
         colorama.init()
+        preset = self.get_preset(options['preset'])
+        if preset:
+            self.parser.set_defaults(**preset)
+            # re-parse the command linei arguments with new defaults in place
+            options = vars(self.parser.parse_args(self.argv[2:]))
         self.pattern = options['pattern']
         self.ignore_case = options['ignore_case']
         self.show_values = options.get('show_values', False)
         self.field_types = options['field_types'] or ['TextField']
         self.admin_hostnames = self.get_admin_hostnames(options)
 
-        identifiers = options['identifier']
+        identifiers = options['identifiers']
         queries = self.get_queries(identifiers)
         for query in queries:
             results = self.search(query)
@@ -65,6 +74,11 @@ class Command(BaseCommand):
                         self.stdout.write(self.get_admin_links(result))
                     if self.show_values is not None:  # can't be a truthiness check, as zero is different from no show
                         self.stdout.write(self.get_value(result, query))
+
+    def run_from_argv(self, argv):
+        # store argv so that we can re-parse it with new defaults if preset mode is used
+        self.argv = argv
+        super(Command, self).run_from_argv(argv)
 
     def get_admin_hostnames(self, options):
         from_options = options.get('admin_links', False)
@@ -95,6 +109,24 @@ class Command(BaseCommand):
             raise CommandError(msg.format(reference))
         return hostname
 
+    def get_preset(self, preset_name):
+        if not preset_name:
+            return None
+        try:
+            presets = getattr(settings, 'DJANGO_GREPDB_PRESETS')
+        except AttributeError:
+            raise CommandError(u'Preset specified but DJANGO_GREPDB_PRESETS is not configured in settings')
+        try:
+            preset = presets[preset_name]
+        except KeyError:
+            msg = u'Preset "{preset_name}" not found in DJANGO_GREPDB_PRESETS. Available values are: {values}'
+            raise CommandError(msg.format(preset_name=preset_name, values=', '.join(presets.keys())))
+        try:
+            preset.keys()
+        except AttributeError:
+            msg = u'Preset "{preset_name}" is not a dict-like object'
+            raise CommandError(msg.format(preset_name=preset_name))
+        return preset
 
     def get_queries(self, identifiers):
         queries = []
