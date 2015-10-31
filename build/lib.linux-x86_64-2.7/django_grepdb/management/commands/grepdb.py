@@ -3,7 +3,10 @@ import re
 
 import colorama
 from django.apps import apps
-from django.core.management.base import BaseCommand
+from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+from django.core.management.base import BaseCommand, CommandError
+from django.core.urlresolvers import reverse
 from termcolor import colored
 
 
@@ -20,22 +23,35 @@ def show_values_style(arg):
 
 class Command(BaseCommand):
     help = 'Provides a grep-like command line interface for searching objects in the database'
-    field_types = [u'TextField']
 
     def add_arguments(self, parser):
         parser.add_argument('pattern', type=str, help='Pattern to search for')
         parser.add_argument('identifier', nargs='+', type=str, help='Identifier of a model or field')
         parser.add_argument('--show-values', '-s', nargs='?', type=show_values_style, default='l',
-                            help='Turn off showing matching values (default is any line containing a match, ' +
+                            help='Turn off showing matching values (default is any line containing a match), ' +
                             'or provide the mode "a" to show the entire field ' +
                             'or an integer to show that many characters either side of a match.')
         parser.add_argument('--ignore-case', '-i', action='store_true', help='Match case-insensitively')
+        parser.add_argument('--find-text-fields', '-t', dest='field_types', action='append_const', const='TextField',
+                            help='Search all TextField fields on a model if no field is specified')
+        parser.add_argument('--find-char-fields', '-c', dest='field_types', action='append_const', const='CharField',
+                            help='Search all CharField fields on a model if no field is specified')
+        parser.add_argument('--find-fields', '-f', dest='field_types', action='append', type=str,
+                            help='Search all fields of this type on a model if no field is specified')
+        parser.add_argument('--admin-links', '-l', nargs='*', default=['http://localhost:8000'],
+                            help='Generate admin links. Defaults to true, using http://localhost:8000/ as hostname.' +
+                            'Can be passed one or more hostnames to use instead. If DJANGO_GREPDB_SITES is a dict ' +
+                            'defined in settings, keys from it can also be passed to use their values as hostnames.' +
+                            'Links can be disabled by using this argument without any values.')
 
     def handle(self, **options):
         colorama.init()
         self.pattern = options['pattern']
         self.ignore_case = options['ignore_case']
         self.show_values = options.get('show_values', False)
+        self.field_types = options['field_types'] or ['TextField']
+        self.admin_hostnames = self.get_admin_hostnames(options)
+
         identifiers = options['identifier']
         queries = self.get_queries(identifiers)
         for query in queries:
@@ -45,8 +61,40 @@ class Command(BaseCommand):
                                           'cyan', attrs=['bold']))
                 for result in results:
                     self.stdout.write(colored(u'{result} (pk={result.pk})'.format(result=result), 'green', attrs=['bold']))
+                    if self.admin_hostnames:
+                        self.stdout.write(self.get_admin_links(result))
                     if self.show_values is not None:  # can't be a truthiness check, as zero is different from no show
                         self.stdout.write(self.get_value(result, query))
+
+    def get_admin_hostnames(self, options):
+        from_options = options.get('admin_links', False)
+        if not from_options:
+            return
+        from django.contrib.admin import site as admin_site
+        self.admin_site = admin_site
+        hostnames = []
+        for reference in from_options:
+            hostnames.append(self.get_admin_hostname(reference))
+        return hostnames
+
+    def get_admin_hostname(self, reference):
+        """Treats the reference as a hostname if it contains a dot or the string 'localhost'.
+        If it contains neither, looks up the reference in settings.DJANGO_GREPDB_SITES
+        """
+        if '.' in reference or 'localhost' in reference:
+            return reference
+        try:
+            sites = getattr(settings, 'DJANGO_GREPDB_SITES')
+        except AttributeError:
+            msg = u'Reference {} is not recognised as a hostname and DJANGO_GREPDB_SITES is not configured in settings'
+            raise CommandError(msg.format(reference))
+        try:
+            hostname = sites[reference]
+        except KeyError:
+            msg = u'Reference {} is not recognised as a hostname and was not found in DJANGO_GREPDB_SITES'
+            raise CommandError(msg.format(reference))
+        return hostname
+
 
     def get_queries(self, identifiers):
         queries = []
@@ -141,3 +189,9 @@ class Command(BaseCommand):
             end_of_previous = end + chars
         value = value.strip() + '\n\n'
         return value
+
+    def get_admin_links(self, result):
+        content_type = ContentType.objects.get_for_model(result)
+        admin_url_pattern = 'admin:{app}_{model}_change'.format(app=content_type.app_label, model=content_type.model)
+        relative_url = reverse(admin_url_pattern, args=[result.pk])
+        return '\n'.join([colored(hostname + relative_url, 'green') for hostname in self.admin_hostnames])
