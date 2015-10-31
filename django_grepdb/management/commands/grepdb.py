@@ -43,7 +43,9 @@ class Command(BaseCommand):
                             'Can be passed one or more hostnames to use instead. If DJANGO_GREPDB_SITES is a dict ' +
                             'defined in settings, keys from it can also be passed to use their values as hostnames.' +
                             'Links can be disabled by using this argument without any values.')
-        parser.add_argument('--preset', '-p', help='The name of a preset configuration in django.conf.settings')
+        parser.add_argument('--preset', '-p', help='The name of a preset configuration in DJANGO_GREPDB_PRESETS. ' +
+                            'DJANGO_GREPDB_PRESETS should be a dict of dicts, with each config dict providing ' +
+                            'default values for any number of parser args.')
         self.parser = parser
 
     def handle(self, **options):
