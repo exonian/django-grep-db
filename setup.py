@@ -1,6 +1,8 @@
 import os
 from setuptools import find_packages, setup
 
+from django_grepdb.version import VERSION
+
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
     README = readme.read()
 
@@ -9,7 +11,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-grep-db',
-    version='0.1.7',
+    version=VERSION,
     packages=find_packages(),
     install_requires=['django>=1.7', 'colorama>=0.3.3', 'termcolor>=1.1.0'],
 

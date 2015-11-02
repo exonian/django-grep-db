@@ -227,3 +227,7 @@ class Command(BaseCommand):
         admin_url_pattern = 'admin:{app}_{model}_change'.format(app=content_type.app_label, model=content_type.model)
         relative_url = reverse(admin_url_pattern, args=[result.pk])
         return '\n'.join([colored(hostname + relative_url, 'green') for hostname in self.admin_hostnames])
+
+    def get_version(self):
+        from ...version import VERSION
+        return VERSION
