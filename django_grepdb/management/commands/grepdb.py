@@ -38,14 +38,15 @@ class Command(BaseCommand):
                             help='Search all CharField fields on a model if no field is specified')
         parser.add_argument('--find-fields', '-f', dest='field_types', action='append', type=str,
                             help='Search all fields of this type on a model if no field is specified')
-        parser.add_argument('--admin-links', '-l', nargs='*', default=['http://localhost:8000'],
-                            help='Generate admin links. Defaults to true, using http://localhost:8000/ as hostname.' +
-                            'Can be passed one or more hostnames to use instead. If DJANGO_GREPDB_SITES is a dict ' +
-                            'defined in settings, keys from it can also be passed to use their values as hostnames.' +
-                            'Links can be disabled by using this argument without any values.')
         parser.add_argument('--preset', '-p', help='The name of a preset configuration in DJANGO_GREPDB_PRESETS. ' +
                             'DJANGO_GREPDB_PRESETS should be a dict of dicts, with each config dict providing ' +
                             'default values for any number of parser args.')
+        if apps.is_installed('django.contrib.admin'):
+            parser.add_argument('--admin-links', '-l', nargs='*', default=['http://localhost:8000'],
+                                help='Generate admin links. Defaults to true, using http://localhost:8000/ as hostname. ' +
+                                'Can be passed one or more hostnames to use instead. If DJANGO_GREPDB_SITES is a ' +
+                                'dict defined in settings, keys from it can also be passed to use their values as ' +
+                                'hostnames. Links can be disabled by using this argument without any values.')
         self.parser = parser
 
     def handle(self, **options):
