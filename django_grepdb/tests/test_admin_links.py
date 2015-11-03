@@ -45,12 +45,61 @@ class TestWithAdminInstalled(TestCase):
         call_command('grepdb', 'quick', 'tests.TestModel.text_field', '-s', stdout=out)
         expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> " \
                    "text_field\x1b[0m\n\x1b[1m\x1b[32mTestModel object " \
-                   "(pk=1)\x1b[0m\n\x1b[32mhttp://localhost:8000/admin/tests/testmodel/1/\x1b[0m\n"
+                   "(pk=1)\x1b[0m\n\x1b[32mlocalhost:8000/admin/tests/testmodel/1/\x1b[0m\n"
         self.assertEqual(out.getvalue(), expected)
 
-    def test_option_without_argyment_turns_off_link_generation(self):
+    def test_option_without_argument_turns_off_link_generation(self):
         out = StringIO()
         call_command('grepdb', 'quick', 'tests.TestModel.text_field', '-s', '-l', stdout=out)
         expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> " \
                    "text_field\x1b[0m\n\x1b[1m\x1b[32mTestModel object (pk=1)\x1b[0m\n"
+        self.assertEqual(out.getvalue(), expected)
+
+    def test_option_with_http_hostname(self):
+        out = StringIO()
+        call_command('grepdb', 'quick', 'tests.TestModel.text_field', '-s', '-l', 'http://fox.example.com', stdout=out)
+        expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> " \
+                   "text_field\x1b[0m\n\x1b[1m\x1b[32mTestModel object " \
+                   "(pk=1)\x1b[0m\n\x1b[32mhttp://fox.example.com/admin/tests/testmodel/1/\x1b[0m\n"
+        self.assertEqual(out.getvalue(), expected)
+
+    def test_option_with_https_hostname(self):
+        out = StringIO()
+        call_command('grepdb', 'quick', 'tests.TestModel.text_field', '-s', '-l', 'https://fox.example.com', stdout=out)
+        expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> " \
+                   "text_field\x1b[0m\n\x1b[1m\x1b[32mTestModel object " \
+                   "(pk=1)\x1b[0m\n\x1b[32mhttps://fox.example.com/admin/tests/testmodel/1/\x1b[0m\n"
+        self.assertEqual(out.getvalue(), expected)
+
+    def test_option_with_schemeless_hostname(self):
+        with self.assertRaises(CommandError) as cm:
+            call_command('grepdb', 'quick', 'tests.TestModel.text_field', '-s', '-l', 'fox.example.com')
+        msg = u'Reference fox.example.com is not recognised as a hostname and was not found in DJANGO_GREPDB_SITES'
+        self.assertEqual(cm.exception.message, msg)
+
+    def test_option_with_localhost(self):
+        out = StringIO()
+        call_command('grepdb', 'quick', 'tests.TestModel.text_field', '-s', '-l', 'localhost:4000', stdout=out)
+        expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> " \
+                   "text_field\x1b[0m\n\x1b[1m\x1b[32mTestModel object " \
+                   "(pk=1)\x1b[0m\n\x1b[32mlocalhost:4000/admin/tests/testmodel/1/\x1b[0m\n"
+        self.assertEqual(out.getvalue(), expected)
+
+    def test_option_with_sites_key(self):
+        out = StringIO()
+        call_command('grepdb', 'quick', 'tests.TestModel.text_field', '-s', '-l', 'production', stdout=out)
+        expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> " \
+                   "text_field\x1b[0m\n\x1b[1m\x1b[32mTestModel object " \
+                   "(pk=1)\x1b[0m\n\x1b[32mhttps://example.com/admin/tests/testmodel/1/\x1b[0m\n"
+        self.assertEqual(out.getvalue(), expected)
+
+    def test_option_with_mixed_arguments(self):
+        out = StringIO()
+        call_command('grepdb', 'quick', 'tests.TestModel.text_field', '-s', '-l', 'staging', 'production',
+                     'https://dev.example.com', stdout=out)
+        expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> " \
+                   "text_field\x1b[0m\n\x1b[1m\x1b[32mTestModel object (pk=1)\x1b[0m\n" \
+                   "\x1b[32mhttps://staging.example.com/admin/tests/testmodel/1/\x1b[0m\n" \
+                   "\x1b[32mhttps://example.com/admin/tests/testmodel/1/\x1b[0m\n" \
+                   "\x1b[32mhttps://dev.example.com/admin/tests/testmodel/1/\x1b[0m\n"
         self.assertEqual(out.getvalue(), expected)

@@ -23,3 +23,8 @@ MIDDLEWARE_CLASSES = (
 SECRET_KEY = 'abcde12345'
 
 ROOT_URLCONF = 'django_grepdb.tests.empty_urls'
+
+DJANGO_GREPDB_SITES = {
+    'staging': 'https://staging.example.com',
+    'production': 'https://example.com',
+}
