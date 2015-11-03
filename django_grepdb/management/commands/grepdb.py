@@ -32,17 +32,17 @@ class Command(BaseCommand):
                             'or provide the mode "a" to show the entire field ' +
                             'or an integer to show that many characters either side of a match.')
         parser.add_argument('--ignore-case', '-i', action='store_true', help='Match case-insensitively')
-        parser.add_argument('--find-text-fields', '-t', dest='field_types', action='append_const', const='TextField',
+        parser.add_argument('--find-text-fields', '-t', dest='field_type', action='append_const', const='TextField',
                             help='Search all TextField fields on a model if no field is specified')
-        parser.add_argument('--find-char-fields', '-c', dest='field_types', action='append_const', const='CharField',
+        parser.add_argument('--find-char-fields', '-c', dest='field_type', action='append_const', const='CharField',
                             help='Search all CharField fields on a model if no field is specified')
-        parser.add_argument('--find-fields', '-f', dest='field_types', action='append', type=str,
+        parser.add_argument('--find-fields', '-f', dest='field_type', action='append', type=str,
                             help='Search all fields of this type on a model if no field is specified')
         parser.add_argument('--preset', '-p', help='The name of a preset configuration in DJANGO_GREPDB_PRESETS. ' +
                             'DJANGO_GREPDB_PRESETS should be a dict of dicts, with each config dict providing ' +
                             'default values for any number of parser args.')
         if apps.is_installed('django.contrib.admin'):
-            parser.add_argument('--admin-links', '-l', nargs='*', default=['localhost:8000'],
+            parser.add_argument('--admin-links', '-l', dest='admin_hostname', nargs='*', default=['localhost:8000'],
                                 help='Generate admin links. Defaults to true, using http://localhost:8000/ as hostname. ' +
                                 'Can be passed one or more hostnames to use instead. If DJANGO_GREPDB_SITES is a ' +
                                 'dict defined in settings, keys from it can also be passed to use their values as ' +
@@ -59,7 +59,7 @@ class Command(BaseCommand):
         self.pattern = options['pattern']
         self.ignore_case = options['ignore_case']
         self.show_values = options.get('show_values', False)
-        self.field_types = options['field_types'] or ['TextField']
+        self.field_type = options['field_type'] or ['TextField']
         self.admin_hostnames = self.get_admin_hostnames(options)
 
         identifiers = options['identifiers']
@@ -82,7 +82,7 @@ class Command(BaseCommand):
         super(Command, self).run_from_argv(argv)
 
     def get_admin_hostnames(self, options):
-        from_options = options.get('admin_links', False)
+        from_options = options.get('admin_hostname', False)
         if not from_options:
             return
         from django.contrib.admin import site as admin_site
@@ -156,7 +156,7 @@ class Command(BaseCommand):
         return (model, field_names)
 
     def get_field_names_for_model(self, model):
-        return [field.name for field in model._meta.fields if field.get_internal_type() in self.field_types]
+        return [field.name for field in model._meta.fields if field.get_internal_type() in self.field_type]
 
     def get_queryset_params(self, field_name):
         lookup_type = 'regex'
