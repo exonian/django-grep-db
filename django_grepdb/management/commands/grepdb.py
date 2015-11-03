@@ -42,7 +42,7 @@ class Command(BaseCommand):
                             'DJANGO_GREPDB_PRESETS should be a dict of dicts, with each config dict providing ' +
                             'default values for any number of parser args.')
         if apps.is_installed('django.contrib.admin'):
-            parser.add_argument('--admin-links', '-l', nargs='*', default=['http://localhost:8000'],
+            parser.add_argument('--admin-links', '-l', nargs='*', default=['localhost:8000'],
                                 help='Generate admin links. Defaults to true, using http://localhost:8000/ as hostname. ' +
                                 'Can be passed one or more hostnames to use instead. If DJANGO_GREPDB_SITES is a ' +
                                 'dict defined in settings, keys from it can also be passed to use their values as ' +
@@ -93,10 +93,10 @@ class Command(BaseCommand):
         return hostnames
 
     def get_admin_hostname(self, reference):
-        """Treats the reference as a hostname if it contains a dot or the string 'localhost'.
+        """Treats the reference as a hostname if it contains either 'http' or 'localhost'.
         If it contains neither, looks up the reference in settings.DJANGO_GREPDB_SITES
         """
-        if '.' in reference or 'localhost' in reference:
+        if 'http' in reference or 'localhost' in reference:
             return reference
         try:
             sites = getattr(settings, 'DJANGO_GREPDB_SITES')
