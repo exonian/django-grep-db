@@ -9,7 +9,7 @@ from models import TestModel
 class TestWithoutAdminInstalled(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.obj_1 = TestModel.objects.create(text_field="The quick brown fox")
+        TestModel.objects.create(text_field="The quick brown fox")
 
     def test_admin_option_not_used_by_default(self):
         out = StringIO()
@@ -37,7 +37,7 @@ class TestWithAdminInstalled(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.obj_1 = TestModel.objects.create(text_field="The quick brown fox")
+        TestModel.objects.create(text_field="The quick brown fox")
 
     def test_default_link_generation_output(self):
         """Default is to generate admin links, and to use localhost:8000 as the hostname"""

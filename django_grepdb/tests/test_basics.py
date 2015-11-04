@@ -9,10 +9,10 @@ from models import TestModel
 class TestBasicsEndToEnd(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.obj_1 = TestModel.objects.create(text_field="The quick brown fox",
+        TestModel.objects.create(text_field="The quick brown fox",
                                              text_field_two="jumped over the lazy brown dog")
-        cls.obj_2 = TestModel.objects.create(text_field="The fox and the cat were not lazy")
-        cls.obj_3 = TestModel.objects.create(text_field="The CAT was not lazy")
+        TestModel.objects.create(text_field="The fox and the cat were not lazy")
+        TestModel.objects.create(text_field="The CAT was not lazy")
 
     def test_minimal_output(self):
         out = StringIO()
