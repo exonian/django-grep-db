@@ -1,6 +1,7 @@
 Django==1.8.5
 argparse==1.2.1
 colorama==0.3.3
+coverage==4.0.2
 flake8==2.5.0
 mccabe==0.3.1
 pep8==1.5.7
