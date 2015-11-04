@@ -42,20 +42,54 @@ class TestWithMisconfiguredSetting(TestCase):
     DJANGO_GREPDB_PRESETS={
         'model_one': {'identifiers': ['tests.TestModel']},
         'model_one_case_insensitive': {'identifiers': ['tests.TestModel'], 'ignore_case': True},
-        'model_two': {'identifiers': ['tests.TestModelTwo']},
-        'model_two_char_fields': {'identifiers': ['tests.TestModelTwo'], 'field_type': ['CharField']},
+        'model_two_multiple_fields': {'identifiers': ['tests.TestModelTwo'], 'field_type': ['CharField', 'TextField']},
+        'both_models': {'identifiers': ['tests.TestModelTwo', 'tests.TestModel']},
     }
 )
 class TestPresets(TestCase):
     @classmethod
     def setUpTestData(cls):
         TestModel.objects.create(text_field="The quick brown fox", text_field_two="jumped over the lazy dog")
+        TestModel.objects.create(text_field="THE QUICK BROWN FOX")
         TestModelTwo.objects.create(text_field="The dog was lazy")
         TestModelTwo.objects.create(char_field="The fox was quick and brown")
 
     def test_identifier_from_preset(self):
         out = StringIO()
         call_command('grepdb', 'brown', '-s', '-p', 'model_one', stdout=out)
-        expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> " \
-                   "text_field\x1b[0m\n\x1b[1m\x1b[32mTestModel object (pk=1)\x1b[0m\n"
+        expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> text_field\x1b[0m\n" \
+                   "\x1b[1m\x1b[32mTestModel object (pk=1)\x1b[0m\n"
+        self.assertEqual(out.getvalue(), expected)
+
+    def test_identifier_and_toggle_from_preset(self):
+        out = StringIO()
+        call_command('grepdb', 'brown', '-s', '-p', 'model_one_case_insensitive', stdout=out)
+        expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> text_field\x1b[0m\n" \
+                   "\x1b[1m\x1b[32mTestModel object (pk=1)\x1b[0m\n" \
+                   "\x1b[1m\x1b[32mTestModel object (pk=2)\x1b[0m\n"
+        self.assertEqual(out.getvalue(), expected)
+
+    def test_identifier_and_field_types_from_preset(self):
+        out = StringIO()
+        call_command('grepdb', 'was', '-s', '-p', 'model_two_multiple_fields', stdout=out)
+        expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModelTwo'> text_field\x1b[0m\n" \
+                   "\x1b[1m\x1b[32mTestModelTwo object (pk=1)\x1b[0m\n" \
+                   "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModelTwo'> char_field\x1b[0m\n" \
+                   "\x1b[1m\x1b[32mTestModelTwo object (pk=2)\x1b[0m\n"
+        self.assertEqual(out.getvalue(), expected)
+
+    def test_multiple_identifiers_from_preset(self):
+        out = StringIO()
+        call_command('grepdb', 'dog', '-s', '-p', 'both_models', stdout=out)
+        expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModelTwo'> text_field\x1b[0m\n" \
+                   "\x1b[1m\x1b[32mTestModelTwo object (pk=1)\x1b[0m\n" \
+                   "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> text_field_two\x1b[0m\n" \
+                   "\x1b[1m\x1b[32mTestModel object (pk=1)\x1b[0m\n"
+        self.assertEqual(out.getvalue(), expected)
+
+    def test_command_line_overrides_preset(self):
+        out = StringIO()
+        call_command('grepdb', 'dog', 'tests.TestModel', '-s', '-p', 'both_models', stdout=out)
+        expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> text_field_two\x1b[0m\n" \
+                   "\x1b[1m\x1b[32mTestModel object (pk=1)\x1b[0m\n"
         self.assertEqual(out.getvalue(), expected)
