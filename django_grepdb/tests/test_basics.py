@@ -10,7 +10,7 @@ class TestBasicsEndToEnd(TestCase):
     @classmethod
     def setUpTestData(cls):
         TestModel.objects.create(text_field="The quick brown fox",
-                                             text_field_two="jumped over the lazy brown dog")
+                                 text_field_two="jumped over the lazy brown dog")
         TestModel.objects.create(text_field="The fox and the cat were not lazy")
         TestModel.objects.create(text_field="The CAT was not lazy")
 
