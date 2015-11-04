@@ -33,11 +33,11 @@ class Command(BaseCommand):
                             'or an integer to show that many characters either side of a match.')
         parser.add_argument('--ignore-case', '-i', action='store_true', help='Match case-insensitively')
         parser.add_argument('--find-text-fields', '-t', dest='field_type', action='append_const', const='TextField',
-                            help='Search all TextField fields on a model if no field is specified')
+                            help='Search all TextField fields (and subclasses) on a model if no field is specified')
         parser.add_argument('--find-char-fields', '-c', dest='field_type', action='append_const', const='CharField',
-                            help='Search all CharField fields on a model if no field is specified')
+                            help='Search all CharField fields (and subclasses) on a model if no field is specified')
         parser.add_argument('--find-fields', '-f', dest='field_type', action='append', type=str,
-                            help='Search all fields of this type on a model if no field is specified')
+                            help='Search all fields of this type (and subclasses) on a model if no field is specified')
         parser.add_argument('--preset', '-p', help='The name of a preset configuration in DJANGO_GREPDB_PRESETS. ' +
                             'DJANGO_GREPDB_PRESETS should be a dict of dicts, with each config dict providing ' +
                             'default values for any number of parser args.')
