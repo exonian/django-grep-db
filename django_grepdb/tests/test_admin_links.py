@@ -30,11 +30,10 @@ class TestWithoutAdminInstalled(TestCase):
         'django.contrib.contenttypes',
         'django_grepdb',
         'django_grepdb.tests',
-    ]
+    ],
+    ROOT_URLCONF='django_grepdb.tests.admin_urls'
 )
 class TestWithAdminInstalled(TestCase):
-    urls = 'django_grepdb.tests.admin_urls'
-
     @classmethod
     def setUpTestData(cls):
         TestModel.objects.create(text_field="The quick brown fox")
