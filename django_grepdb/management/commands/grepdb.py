@@ -119,6 +119,9 @@ class Command(BaseCommand):
             raise CommandError(u'Preset specified but DJANGO_GREPDB_PRESETS is not configured in settings')
         try:
             preset = presets[preset_name]
+        except TypeError:
+            msg = u'DJANGO_GREPDB_PRESETS is not a dict-like object'
+            raise CommandError(msg)
         except KeyError:
             msg = u'Preset "{preset_name}" not found in DJANGO_GREPDB_PRESETS. Available values are: {values}'
             raise CommandError(msg.format(preset_name=preset_name, values=', '.join(presets.keys())))
