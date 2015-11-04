@@ -54,8 +54,18 @@ class Command(BaseCommand):
         preset = self.get_preset(options['preset'])
         if preset:
             self.parser.set_defaults(**preset)
-            # re-parse the command linei arguments with new defaults in place
-            options = vars(self.parser.parse_args(self.argv[2:]))
+            # re-parse the command line arguments with new defaults in place
+            try:
+                options = vars(self.parser.parse_args(self.raw_args))
+            except AttributeError:
+                if not self._called_from_command_line:
+                    # regular call_command doesn't store raw_args
+                    msg = '--preset mode is not compatible with django.core.management.call_command: you need to ' \
+                          'use django_grepdb.management.call_command instead'
+                    raise CommandError(msg)
+                else:
+                    # if it was called from the command line, the problem is something unknown
+                    raise
         self.pattern = options['pattern']
         self.ignore_case = options['ignore_case']
         self.show_values = options.get('show_values', False)
@@ -77,8 +87,8 @@ class Command(BaseCommand):
                         self.stdout.write(self.get_value(result, query))
 
     def run_from_argv(self, argv):
-        # store argv so that we can re-parse it with new defaults if preset mode is used
-        self.argv = argv
+        # store raw args so that we can re-parse them with new defaults if preset mode is used
+        self.raw_args = argv[2:]
         super(Command, self).run_from_argv(argv)
 
     def get_admin_hostnames(self, options):
