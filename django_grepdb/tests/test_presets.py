@@ -44,6 +44,7 @@ class TestWithMisconfiguredSetting(TestCase):
         'model_one_case_insensitive': {'identifiers': ['tests.TestModel'], 'ignore_case': True},
         'model_two_multiple_fields': {'identifiers': ['tests.TestModelTwo'], 'field_type': ['CharField', 'TextField']},
         'both_models': {'identifiers': ['tests.TestModelTwo', 'tests.TestModel']},
+        'preset_is_a_list': ['tests.TestModel', 'ignore_case']
     }
 )
 class TestPresets(TestCase):
@@ -53,6 +54,14 @@ class TestPresets(TestCase):
         TestModel.objects.create(text_field="THE QUICK BROWN FOX")
         TestModelTwo.objects.create(text_field="The dog was lazy")
         TestModelTwo.objects.create(char_field="The fox was quick and brown")
+
+    def test_error_raised_when_using_default_call_command(self):
+        from django.core.management import call_command
+        with self.assertRaises(CommandError) as cm:
+            call_command('grepdb', 'brown', '-p', 'model_one')
+        msg = "--preset mode is not compatible with django.core.management.call_command: " \
+              "you need to use django_grepdb.management.call_command instead"
+        self.assertEqual(cm.exception.message, msg)
 
     def test_identifier_from_preset(self):
         out = StringIO()
@@ -93,3 +102,16 @@ class TestPresets(TestCase):
         expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> text_field_two\x1b[0m\n" \
                    "\x1b[1m\x1b[32mTestModel object (pk=1)\x1b[0m\n"
         self.assertEqual(out.getvalue(), expected)
+
+    def test_misconfigured_preset(self):
+        with self.assertRaises(CommandError) as cm:
+            call_command('grepdb', 'brown', '-p', 'preset_is_a_list')
+        msg = 'Preset "preset_is_a_list" is not a dict-like object'
+        self.assertEqual(cm.exception.message, msg)
+
+    def test_unknown_preset(self):
+        with self.assertRaises(CommandError) as cm:
+            call_command('grepdb', 'brown', '-p', 'what_preset')
+        msg = 'Preset "what_preset" not found in DJANGO_GREPDB_PRESETS. Available values are: ' \
+              'model_two_multiple_fields, preset_is_a_list, model_one, model_one_case_insensitive, both_models'
+        self.assertEqual(cm.exception.message, msg)
