@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.conf import settings
 from django.core.management import call_command, CommandError
 from django.test import TestCase, override_settings
 from django.utils.six import StringIO
@@ -102,3 +103,12 @@ class TestWithAdminInstalled(TestCase):
                    "\x1b[32mhttps://example.com/admin/tests/testmodel/1/\x1b[0m\n" \
                    "\x1b[32mhttps://dev.example.com/admin/tests/testmodel/1/\x1b[0m\n"
         self.assertEqual(out.getvalue(), expected)
+
+    @override_settings()
+    def test_option_without_sites_setting(self):
+        del settings.DJANGO_GREPDB_SITES
+        with self.assertRaises(CommandError) as cm:
+            call_command('grepdb', 'quick', 'tests.TestModel.text_field', '-s', '-l', 'fox.example.com')
+        msg = u'Reference fox.example.com is not recognised as a hostname and DJANGO_GREPDB_SITES is not ' \
+              'configured in settings'
+        self.assertEqual(cm.exception.message, msg)
