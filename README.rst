@@ -61,7 +61,7 @@ Specify fields instead of finding all text fields::
 
     $ python manage.py grepdb <pattern> sprinkle.EmailAction.body sprinkle.EmailAction.subject
 
-Find charFields instead of textFields::
+Find all insteances of CharField instead of TextField::
 
     $ python manage.py grepdb <pattern> sprinkle.EmailAction -c
 
