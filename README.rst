@@ -33,7 +33,7 @@ Usage
 
 Find instances of ``{% custom_template_tag.*%}`` in all text fields on the
 model ``EmailAction`` from app ``sprinkle``, show lines containing matches,
-and generate admin links (if ``django.contrib.admin is installed``)::
+and generate admin links (if ``django.contrib.admin`` is installed)::
 
     $ python manage.py grepdb "{% custom_template_tag.*%}" sprinkle.EmailAction
     <class 'sprinkle.models.EmailAction'> text_field
@@ -61,7 +61,7 @@ Specify fields instead of finding all text fields::
 
     $ python manage.py grepdb <pattern> sprinkle.EmailAction.body sprinkle.EmailAction.subject
 
-Find all insteances of CharField instead of TextField::
+Find all instances of CharField instead of TextField::
 
     $ python manage.py grepdb <pattern> sprinkle.EmailAction -c
 
