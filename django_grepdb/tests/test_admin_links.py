@@ -39,8 +39,21 @@ class TestWithAdminInstalled(TestCase):
     def setUpTestData(cls):
         TestModel.objects.create(text_field="The quick brown fox")
 
-    def test_default_link_generation_output(self):
-        """Default is to generate admin links, and to use localhost:8000 as the hostname"""
+    def test_default_link_generation_output_with_defined_default(self):
+        out = StringIO()
+        call_command('grepdb', 'quick', 'tests.TestModel.text_field', '-s', stdout=out)
+        expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> " \
+                   "text_field\x1b[0m\n\x1b[1m\x1b[32mTestModel object " \
+                   "(pk=1)\x1b[0m\n\x1b[32mhttps://local.example.com/admin/tests/testmodel/1/\x1b[0m\n"
+        self.assertEqual(out.getvalue(), expected)
+
+    @override_settings(
+        DJANGO_GREPDB_SITES = {
+            'staging': 'https://staging.example.com',
+            'production': 'https://example.com',
+        }
+    )
+    def test_default_link_generation_output_without_defined_default(self):
         out = StringIO()
         call_command('grepdb', 'quick', 'tests.TestModel.text_field', '-s', stdout=out)
         expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> " \
@@ -95,12 +108,13 @@ class TestWithAdminInstalled(TestCase):
 
     def test_option_with_mixed_arguments(self):
         out = StringIO()
-        call_command('grepdb', 'quick', 'tests.TestModel.text_field', '-s', '-l', 'staging', 'production',
+        call_command('grepdb', 'quick', 'tests.TestModel.text_field', '-s', '-l', 'staging', 'production', 'default',
                      'https://dev.example.com', stdout=out)
         expected = "\x1b[1m\x1b[36m\n<class 'django_grepdb.tests.models.TestModel'> " \
                    "text_field\x1b[0m\n\x1b[1m\x1b[32mTestModel object (pk=1)\x1b[0m\n" \
                    "\x1b[32mhttps://staging.example.com/admin/tests/testmodel/1/\x1b[0m\n" \
                    "\x1b[32mhttps://example.com/admin/tests/testmodel/1/\x1b[0m\n" \
+                   "\x1b[32mhttps://local.example.com/admin/tests/testmodel/1/\x1b[0m\n" \
                    "\x1b[32mhttps://dev.example.com/admin/tests/testmodel/1/\x1b[0m\n"
         self.assertEqual(out.getvalue(), expected)
 

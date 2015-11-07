@@ -27,4 +27,5 @@ ROOT_URLCONF = 'django_grepdb.tests.empty_urls'
 DJANGO_GREPDB_SITES = {
     'staging': 'https://staging.example.com',
     'production': 'https://example.com',
+    'default': 'https://local.example.com',
 }
