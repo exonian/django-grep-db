@@ -50,7 +50,7 @@ and generate admin links (if ``django.contrib.admin`` is installed)::
 Options
 -------
 
-Options are listed using ``$ python manage.py grepdb --html`` but here are some of the things
+Options are listed using ``$ python manage.py grepdb --help`` but here are some of the things
 you can do with ``django_grepdb``.
 
 Search multiple models::

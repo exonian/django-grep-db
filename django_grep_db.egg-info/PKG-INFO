@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: django-grep-db
-Version: 1.1.1
+Version: 1.1.2
 Summary: A simple Django app for command-line searching via the ORM
 Home-page: https://github.com/exonian/django-grep-db
 Author: Michael Blatherwick
@@ -58,7 +58,7 @@ Description: =============
         Options
         -------
         
-        Options are listed using ``$ python manage.py grepdb --html`` but here are some of the things
+        Options are listed using ``$ python manage.py grepdb --help`` but here are some of the things
         you can do with ``django_grepdb``.
         
         Search multiple models::
