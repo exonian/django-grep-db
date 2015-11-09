@@ -28,8 +28,8 @@ class Command(BaseCommand):
         parser.add_argument('pattern', type=str, help='Pattern to search for')
         parser.add_argument('identifiers', nargs='*', type=str, help='Identifier of a model or field')
         parser.add_argument('--show-values', '-s', nargs='?', type=show_values_style, default='l',
-                            help='Turn off showing matching values (default is any line containing a match), ' \
-                            'or provide the mode "a" to show the entire field ' \
+                            help='Turn off showing matching values (default is any line containing a match), '
+                            'or provide the mode "a" to show the entire field '
                             'or an integer to show that many characters either side of a match.')
         parser.add_argument('--ignore-case', '-i', action='store_true', help='Match case-insensitively')
         parser.add_argument('--find-text-fields', '-t', dest='field_type', action='append_const', const='TextField',
@@ -38,15 +38,15 @@ class Command(BaseCommand):
                             help='Search all CharField fields (and subclasses) on a model if no field is specified')
         parser.add_argument('--find-fields', '-f', dest='field_type', action='append', type=str,
                             help='Search all fields of this type (and subclasses) on a model if no field is specified')
-        parser.add_argument('--preset', '-p', help='The name of a preset configuration in DJANGO_GREPDB_PRESETS. ' \
-                            'DJANGO_GREPDB_PRESETS should be a dict of dicts, with each config dict providing ' \
+        parser.add_argument('--preset', '-p', help='The name of a preset configuration in DJANGO_GREPDB_PRESETS. '
+                            'DJANGO_GREPDB_PRESETS should be a dict of dicts, with each config dict providing '
                             'default values for any number of parser args.')
         if apps.is_installed('django.contrib.admin'):
             parser.add_argument('--admin-links', '-l', dest='admin_hostname', nargs='*', default=['default'],
-                                help='Generate admin links. Defaults to true, using http://localhost:8000/ as hostname. ' \
-                                'Can be passed one or more hostnames to use instead. If DJANGO_GREPDB_SITES is a ' \
-                                'dict defined in settings, the value of the "default" key will be used as default, ' \
-                                'and keys from it can also be passed to use their values as hostnames. ' \
+                                help='Generate admin links. Defaults to true, using http://localhost:8000/ as hostname. '
+                                'Can be passed one or more hostnames to use instead. If DJANGO_GREPDB_SITES is a '
+                                'dict defined in settings, the value of the "default" key will be used as default, '
+                                'and keys from it can also be passed to use their values as hostnames. '
                                 'Links can be disabled by using this argument without any values.')
         self.parser = parser
 

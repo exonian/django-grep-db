@@ -9,11 +9,11 @@ from models import TestModel
 class TestShowValues(TestCase):
     @classmethod
     def setUpTestData(cls):
-        TestModel.objects.create(text_field="Lorem ipsum dolor sit amet, eu eam option expetendis. An equidem " \
+        TestModel.objects.create(text_field="Lorem ipsum dolor sit amet, eu eam option expetendis. An equidem "
                                             "noluisse appareat his. Feugiat meliore vix ex, vel ad elit feugiat.")
-        TestModel.objects.create(text_field="In qui doming evertitur, cum dicam vituperatoribus id. Insolens " \
-                                            "assueverit quo an, et case choro minimum usu, te sit mediocrem.\n" \
-                                            "Te placerat deserunt cum, et per enim mutat audire, putent graeco " \
+        TestModel.objects.create(text_field="In qui doming evertitur, cum dicam vituperatoribus id. Insolens "
+                                            "assueverit quo an, et case choro minimum usu, te sit mediocrem.\n"
+                                            "Te placerat deserunt cum, et per enim mutat audire, putent graeco "
                                             "eligendi ne vix. Ut nisl ornatus nec, discere fierent eu has.")
         TestModel.objects.create(text_field="Cu usu molestie invidunt molestie usu cu.")
 

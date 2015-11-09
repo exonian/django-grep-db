@@ -48,7 +48,7 @@ class TestWithAdminInstalled(TestCase):
         self.assertEqual(out.getvalue(), expected)
 
     @override_settings(
-        DJANGO_GREPDB_SITES = {
+        DJANGO_GREPDB_SITES={
             'staging': 'https://staging.example.com',
             'production': 'https://example.com',
         }
